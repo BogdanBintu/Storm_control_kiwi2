@@ -37,19 +37,27 @@ class NIDAQTask(PyDAQmx.Task):
 
     def __init__(self, **kwds):
         with getLock():
+            self.errorDAQ = False
             super().__init__(**kwds)
 
     def clearTask(self):
         with getLock():
-            super().ClearTask()
-
+            try:
+                super().ClearTask()
+            except:
+                print("Failed clearTask BB")
     def startTask(self):
         with getLock():
             super().StartTask()
 
     def stopTask(self):
         with getLock():
-            super().StopTask()
+            try:
+                super().StopTask()
+                self.errorDAQ = False
+            except:
+                print("Failed stopTask BB")
+                self.errorDAQ = True
 
     def taskIsDone(self):
         done = ctypes.c_long(0)

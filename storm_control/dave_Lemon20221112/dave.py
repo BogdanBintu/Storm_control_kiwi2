@@ -65,7 +65,7 @@ class CommandEngine(QtCore.QObject):
         self.test_mode = False
         
         # HAL Client
-        self.HALClient = tcpClient.TCPClient(port = 9900,
+        self.HALClient = tcpClient.TCPClient(port = 9000,
                                              server_name = "HAL",
                                              verbose = False)
         
@@ -158,7 +158,12 @@ class Dave(QtWidgets.QMainWindow):
     @hdebug.debug
     def __init__(self, parameters, parent = None):
         QtWidgets.QMainWindow.__init__(self, parent)
-
+        fl_DAQ = r'C:\Data\errorDAQ.txt'
+        fl_Stage = r'C:\Data\errorStage.txt'
+        for fl in [fl_DAQ,fl_Stage]:
+            fid = open(fl,'w')
+            fid.write('False')
+            fid.close()
         # General.
         self.directory = ""
         self.notifier = notifications.Notifier("", "", "", "")
@@ -409,17 +414,32 @@ class Dave(QtWidgets.QMainWindow):
             self.ui.commandSequenceTreeView.updateEstimates()
 
         # Increment command to the next valid command / action.
-        
         #BB: modify here
         #
-        errorDAQ = eval([ln for ln in open(r'C:\Data\errorDAQ.txt','r')][0])
+        fl_DAQ = r'C:\Data\errorDAQ.txt'
+        fl_Stage = r'C:\Data\errorStage.txt'
+        for fl in [fl_DAQ,fl_Stage]:
+            if not os.path.exists(fl):
+                fid =  open(fl,'w')
+                fid.write('False')
+                fid.close()
+        
+        errorDAQ = eval([ln for ln in open(fl_DAQ,'r')][0])
+        errorStage = eval([ln for ln in open(fl_Stage,'r')][0])
+        
         if errorDAQ:
             next_command = self.ui.commandSequenceTreeView.getCurrentItem()
             currentDT = datetime.datetime.now()
             print(str(currentDT))
-        else:
+        
+        if errorStage:
+            next_command = self.ui.commandSequenceTreeView.getPreviousItem(index=2)
+            currentDT = datetime.datetime.now()
+            print(str(currentDT))
+        if not errorDAQ and not errorStage:
             next_command = self.ui.commandSequenceTreeView.getNextItem()
-
+        
+        
         # Handle last command in list.
         if next_command is None:
             self.ui.runButton.setText("Start")

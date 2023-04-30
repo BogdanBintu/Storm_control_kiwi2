@@ -101,7 +101,7 @@ class CTTaskFunctionality(NidaqFunctionality):
         self.retriggerable = retriggerable
         self.trigger_source = trigger_source
         
-    def pwmOutput(self, duty_cycle = 0.5, cycles = 0):
+    def pwmOutput(self, duty_cycle = 0.50, cycles = 0):
         if self.task is not None:
             self.task.stopTask()
             self.task.clearTask()
@@ -218,7 +218,7 @@ class NidaqModule(daqModule.DaqModule):
 
     def __init__(self, module_params = None, qt_settings = None, **kwds):
         super().__init__(**kwds)
-
+        self.errorDAQ = False
         # These are the tasks that are used for waveform output.
         self.ao_task = None
         self.do_task = None
@@ -373,7 +373,7 @@ class NidaqModule(daqModule.DaqModule):
                 try:
                     self.ct_task = nicontrol.CounterOutput(source = self.timing.get("counter"), 
                                                            frequency = frequency, 
-                                                           duty_cycle = 0.5)
+                                                           duty_cycle = 0.50)
                     self.ct_task.setCounter(number_samples = self.oversampling)
 
                     rising_edge = True
@@ -452,15 +452,27 @@ class NidaqModule(daqModule.DaqModule):
         """
         Handle the 'stop film' message.
         """
+        
+        #####
+        #import gc
+        #print(gc.get_referrers(self))
+        #####
         if self.run_shutters:
+            self.errorDAQ=False
             for task in [self.ct_task, self.ao_task, self.do_task]:
                 if task is not None:
                     try:
                         task.stopTask()
                         task.clearTask()
+                        errorDAQ_ = task.errorDAQ
+                        if errorDAQ_:
+                            self.errorDAQ=True
                     except nicontrol.NIException as e:
                         hdebug.logText("stop / clear failed for task " + str(task) + " with " + str(e))
-
+            #####BB patch to test DAQ error
+            fid = open("C:\Data\errorDAQ.txt",'w')
+            fid.write(str(self.errorDAQ))
+            fid.close()
             # Need to explicitly clear these so that PyDAQmx will release the resources.
             self.ao_task = None
             self.ct_task = None

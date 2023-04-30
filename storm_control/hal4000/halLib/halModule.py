@@ -320,7 +320,11 @@ class HalModule(QtCore.QObject):
         message = self.queued_messages.popleft()
 
         try:
+            # while True:
             self.processMessage(message)
+            #if not getattr(message,errorDAQ,False):
+            #    break
+            #print(type(message),message)
         except Exception as exception:
             message.addError(halMessage.HalMessageError(source = self.module_name,
                                                         message = str(exception),

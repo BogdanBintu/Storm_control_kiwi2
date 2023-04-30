@@ -65,7 +65,7 @@ class CommandEngine(QtCore.QObject):
         self.test_mode = False
         
         # HAL Client
-        self.HALClient = tcpClient.TCPClient(port = 9900,
+        self.HALClient = tcpClient.TCPClient(port = 9000,
                                              server_name = "HAL",
                                              verbose = False)
         
@@ -409,10 +409,9 @@ class Dave(QtWidgets.QMainWindow):
             self.ui.commandSequenceTreeView.updateEstimates()
 
         # Increment command to the next valid command / action.
-        
         #BB: modify here
         #
-        errorDAQ = eval([ln for ln in open(r'C:\Data\errorDAQ.txt','r')][0])
+        errorDAQ = eval([ln for ln in open(r'D:\Data\errorDAQ.txt','r')][0])
         if errorDAQ:
             next_command = self.ui.commandSequenceTreeView.getCurrentItem()
             currentDT = datetime.datetime.now()
@@ -456,7 +455,7 @@ class Dave(QtWidgets.QMainWindow):
                 self.handlePause()
 
         # Update progress bar and current command display.
-        if not errorDAQ:
+        self.updateRunStatusDisplay()        if not errorDAQ:
             self.updateRunStatusDisplay()
 
     ## handleDropXML

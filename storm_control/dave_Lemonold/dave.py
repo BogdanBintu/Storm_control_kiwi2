@@ -158,7 +158,15 @@ class Dave(QtWidgets.QMainWindow):
     @hdebug.debug
     def __init__(self, parameters, parent = None):
         QtWidgets.QMainWindow.__init__(self, parent)
-
+        self.fl_DAQ = r'C:\Data\errorDAQ.txt'
+        self.fl_DAQ2 = r'C:\Data\errorDAQ2.txt'
+        self.fl_Stage = r'C:\Data\errorStage.txt'
+        fl_DAQ,fl_DAQ2,fl_Stage = self.fl_DAQ,self.fl_DAQ2,self.fl_Stage
+        for fl in [fl_DAQ,fl_DAQ2,fl_Stage]:
+            if True:#not os.path.exists(fl):
+                fid =  open(fl,'w')
+                fid.write('False')
+                fid.close()
         # General.
         self.directory = ""
         self.notifier = notifications.Notifier("", "", "", "")
@@ -412,13 +420,24 @@ class Dave(QtWidgets.QMainWindow):
         
         #BB: modify here
         #
-        errorDAQ = eval([ln for ln in open(r'C:\Data\errorDAQ.txt','r')][0])
+        #errorDAQ = eval([ln for ln in open(r'C:\Data\errorDAQ.txt','r')][0])
+        fl_DAQ,fl_DAQ2,fl_Stage = self.fl_DAQ,self.fl_DAQ2,self.fl_Stage
+
+        errorDAQ = eval([ln for ln in open(fl_DAQ,'r')][0])
+        errorDAQ = errorDAQ or eval([ln for ln in open(fl_DAQ2,'r')][0])
+        errorStage = eval([ln for ln in open(fl_Stage,'r')][0])
+
         if errorDAQ:
             next_command = self.ui.commandSequenceTreeView.getCurrentItem()
             currentDT = datetime.datetime.now()
             print(str(currentDT))
-        else:
+        if errorStage:
+            next_command = self.ui.commandSequenceTreeView.getPreviousItem(index=2)
+            currentDT = datetime.datetime.now()
+            print(str(currentDT))
+        if not errorDAQ and not errorStage:
             next_command = self.ui.commandSequenceTreeView.getNextItem()
+        
 
         # Handle last command in list.
         if next_command is None:

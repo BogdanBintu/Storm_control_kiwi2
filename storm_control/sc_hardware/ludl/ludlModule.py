@@ -35,7 +35,7 @@ class LudlStageRS232(stageModule.StageModule):
         self.stage = ludl.LudlRS232(port = configuration.get("com_port"))
 
         if self.stage.getStatus():
-            self.stage.setVelocity(100000,100000)
+            self.stage.setVelocity(30000,30000)
             self.stage_functionality = LudlStageFunctionality(device_mutex = QtCore.QMutex(),
                                                               stage = self.stage,
                                                               update_interval = 500)
@@ -52,7 +52,7 @@ class LudlStageTCP(stageModule.StageModule):
         self.stage = ludl.LudlTCP(ip_address = configuration.get("ip_address"))
 
         if self.stage.getStatus():
-            self.stage.setVelocity(100000,100000)
+            self.stage.setVelocity(30000,30000)
             self.stage_functionality = LudlStageFunctionality(stage = self.stage,
                                                               update_interval = 500)
         else:
